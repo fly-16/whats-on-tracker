@@ -142,7 +142,6 @@ export async function fetchEspnTennisGames(date: string): Promise<Game[]> {
               id: parseInt(event.id),
               name: event.name,
               logo: '',
-              officialUrl: undefined,
             },
             startTime: comp.startDate || comp.date,
             status,
