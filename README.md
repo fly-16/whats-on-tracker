@@ -2,8 +2,6 @@
 
 A personal app for tracking scheduled football games and tennis matches. 
 
-![what's on screenshot](public/whats-on-screenshot.png)
-
 ## What this does
 
 This app consolidates sports games I may be interested to follow in a single view, showing upcoming matches with start times and finished games with scores, so I don't need to open multiple from different sources.  
@@ -15,6 +13,10 @@ This app consolidates sports games I may be interested to follow in a single vie
 - Live and upcoming matches are highlighted to help plan what to watch
 - Date strip to browse beyond what's on for today
 - No API key required
+
+<br>
+
+![what's on screenshot](public/whats-on-screenshot.png)
 
 ### What's covered
 
