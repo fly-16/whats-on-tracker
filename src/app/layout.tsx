@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Fira_Code, Outfit } from "next/font/google";
+import { Plus_Jakarta_Sans, Fira_Code, Outfit, Lora } from "next/font/google";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -21,6 +21,12 @@ const outfit = Outfit({
   weight: ["500", "600"],
 });
 
+const lora = Lora({
+  variable: "--font-lora",
+  subsets: ["latin"],
+  style: ["italic"],
+});
+
 export const metadata: Metadata = {
   title: "what's on",
   description: "Today's football and tennis schedule",
@@ -32,7 +38,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${jakarta.variable} ${firaCode.variable} ${outfit.variable} h-full antialiased`}>
+    <html lang="en" className={`${jakarta.variable} ${firaCode.variable} ${outfit.variable} ${lora.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
