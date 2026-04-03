@@ -21,6 +21,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [lastFetched, setLastFetched] = useState<Date | null>(null);
   const [selectedFootballLeague, setSelectedFootballLeague] = useState<number | null>(null);
+  const [mobileSport, setMobileSport] = useState<'football' | 'tennis'>('tennis');
   const [tzAbbr, setTzAbbr] = useState('');
   const [currentTime, setCurrentTime] = useState('');
 
@@ -134,6 +135,23 @@ export default function Home() {
             )}
           </div>
         </div>
+
+        <div className="sport-switcher">
+          <button
+            onClick={() => setMobileSport('football')}
+            className={`sport-switch-btn f-tab${mobileSport === 'football' ? ' active' : ''}`}
+          >
+            <span className="sport-dot green" />
+            Football
+          </button>
+          <button
+            onClick={() => setMobileSport('tennis')}
+            className={`sport-switch-btn t-tab${mobileSport === 'tennis' ? ' active' : ''}`}
+          >
+            <span className="sport-dot blue" />
+            Tennis
+          </button>
+        </div>
       </div>
 
       {/* ── Main content ── */}
@@ -153,7 +171,7 @@ export default function Home() {
           </button>
         </div>
       ) : (
-        <div className="panels">
+        <div className={`panels panels--${mobileSport}`}>
           {/* ── Football panel ── */}
           <div className="sport-panel football-panel">
             <FootballPanel

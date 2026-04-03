@@ -530,3 +530,73 @@ html, body {
   align-items: flex-end;
   min-width: 16px;
 }
+
+/* ────────────────────────────────────────
+   SPORT SWITCHER (mobile only)
+──────────────────────────────────────── */
+.sport-switcher {
+  display: none;
+}
+
+/* ────────────────────────────────────────
+   MOBILE
+──────────────────────────────────────── */
+@media (max-width: 768px) {
+  .app-shell {
+    box-shadow: none;
+    height: 100dvh;
+  }
+
+  .app-title {
+    font-size: 30px;
+  }
+
+  .header-top {
+    margin-bottom: 16px;
+  }
+
+  .day-pill {
+    min-width: 46px;
+    padding: 6px 10px 8px;
+  }
+
+  .sport-switcher {
+    display: flex;
+    gap: 6px;
+    padding: 10px 0 0;
+  }
+
+  .sport-switch-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-family: var(--font-fira), monospace;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 8px 8px 0 0;
+    border: 1px solid var(--border2);
+    border-bottom: none;
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+
+  .panels {
+    grid-template-columns: 1fr;
+  }
+
+  .panels.panels--football .sport-panel:last-child  { display: none; }
+  .panels.panels--tennis  .sport-panel:first-child  { display: none; }
+
+  .football-panel {
+    border-right: none;
+  }
+
+  .match-list {
+    padding: 2px 14px 64px;
+  }
+}
