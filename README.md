@@ -4,7 +4,7 @@ A personal app for tracking scheduled football games and tennis matches.
 
 ## What this does
 
-This app consolidates sports games I may be interested to follow in a single view, showing upcoming matches with start times and finished games with scores, so I don't need to open multiple from different sources.  
+This app consolidates sports games I may be interested to follow in a single view, showing upcoming matches with start times and finished games with scores, so I don't need to open multiple tabs from different sources.
 
 ### Key Features
 
