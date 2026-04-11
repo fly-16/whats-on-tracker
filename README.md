@@ -9,7 +9,7 @@ This app consolidates sports games I may be interested to follow in a single vie
 ### Key Features
 
 - Competitions are personally curated
-- Football and tennis side by side, no switching between views
+- Adaptive view: football and tennis side by side on desktop, single panel on mobile
 - Live and upcoming matches are highlighted to help plan what to watch
 - Date strip to browse beyond what's on for today
 - No API key required
