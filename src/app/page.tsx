@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { format } from 'date-fns';
 import { RefreshCw, Radio } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 import { Game } from '@/types';
 import DayPicker from '@/components/DayPicker';
@@ -97,6 +98,7 @@ export default function Home() {
 
           <div className="header-right">
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Link href="/about" className="about-link about-link-desktop" style={{ marginRight: 6 }}>About</Link>
               {isToday && (
                 <button
                   onClick={() => setLiveOnly(v => !v)}
@@ -106,20 +108,23 @@ export default function Home() {
                   Live
                 </button>
               )}
-              {lastFetched && !isLoading && (
-                <span style={{ fontFamily: 'var(--font-fira), monospace', fontSize: 11, color: 'var(--text)' }}>
-                  {format(lastFetched, 'HH:mm')}
-                </span>
-              )}
-              {selectedDate && (
-                <button
-                  onClick={() => fetchSchedule(selectedDate, true)}
-                  disabled={isLoading}
-                  className="refresh-btn"
-                >
-                  <RefreshCw size={12} className={isLoading ? 'animate-spin' : ''} />
-                </button>
-              )}
+              <span
+                style={{
+                  fontFamily: 'var(--font-fira), monospace',
+                  fontSize: 11,
+                  color: isLoading ? 'var(--text3)' : 'var(--text)',
+                  visibility: lastFetched ? 'visible' : 'hidden',
+                }}
+              >
+                {lastFetched ? format(lastFetched, 'HH:mm') : '00:00'}
+              </span>
+              <button
+                onClick={() => selectedDate && fetchSchedule(selectedDate, true)}
+                disabled={isLoading || !selectedDate}
+                className="refresh-btn"
+              >
+                <RefreshCw size={12} className={isLoading ? 'animate-spin' : ''} />
+              </button>
             </div>
           </div>
         </div>
@@ -192,6 +197,10 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      <footer className="mobile-about-footer">
+        <Link href="/about" className="about-link">About</Link>
+      </footer>
 
     </div>
   );
