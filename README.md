@@ -1,6 +1,8 @@
 # What's on?
 
-A personal app for tracking scheduled football games and tennis matches. 
+A personal fixtures tracker built around a specific delegation: I tell it which competitions may matter to me; it tells me what relevant games are on. I keep the curation and the in-the-moment choosing; it handles the boring work of checking multiple sources.  
+
+No recommendations, no notifications. The tool surfaces; I pull.  
 
 ## What this does
 
