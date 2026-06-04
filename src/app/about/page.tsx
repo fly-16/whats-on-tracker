@@ -24,7 +24,10 @@ export default function AboutPage() {
       <main className="about-body">
         <section className="about-section">
           <p className="about-p">
-            A personal app for tracking football and tennis matches in one view.
+            A personal fixtures tracker built around a specific delegation: I tell it which competitions may matter to me; it tells me what relevant games are on. I keep the curation and the in-the-moment choosing; it handles the boring work of checking multiple sources.
+            <br />
+            <br />
+            No recommendations, no notifications. The tool surfaces; I pull.
           </p>
         </section>
 
