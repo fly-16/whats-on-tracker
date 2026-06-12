@@ -138,16 +138,7 @@ export default function Home() {
 
           <div className="header-right">
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div className="view-switcher">
-                <button
-                  onClick={() => setView('day')}
-                  className={`view-tab${view === 'day' ? ' active' : ''}`}
-                >Day</button>
-                <button
-                  onClick={() => setView('week')}
-                  className={`view-tab${view === 'week' ? ' active' : ''}`}
-                >Week</button>
-              </div>
+              <ViewSwitcher view={view} setView={setView} className="view-switcher-desktop" />
               <Link href="/about" className="about-link about-link-desktop" style={{ marginRight: 6 }}>About</Link>
               {view === 'day' && isToday && (
                 <button
@@ -203,13 +194,16 @@ export default function Home() {
               </button>
             </div>
           )}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            {currentTime && (
-              <span className="date-badge">{currentTime}</span>
-            )}
-            {tzAbbr && (
-              <span className="date-badge">{tzAbbr}</span>
-            )}
+          <div className="calendar-row-right">
+            <div className="calendar-row-badges">
+              {currentTime && (
+                <span className="date-badge">{currentTime}</span>
+              )}
+              {tzAbbr && (
+                <span className="date-badge">{tzAbbr}</span>
+              )}
+            </div>
+            <ViewSwitcher view={view} setView={setView} className="view-switcher-mobile" />
           </div>
         </div>
 
@@ -316,6 +310,29 @@ export default function Home() {
         <Link href="/about" className="about-link">About</Link>
       </footer>
 
+    </div>
+  );
+}
+
+// ── View switcher (Day / Week) ──────────────────────────────────────────────────
+
+function ViewSwitcher({
+  view, setView, className,
+}: {
+  view: View;
+  setView: (v: View) => void;
+  className?: string;
+}) {
+  return (
+    <div className={`view-switcher${className ? ' ' + className : ''}`}>
+      <button
+        onClick={() => setView('day')}
+        className={`view-tab${view === 'day' ? ' active' : ''}`}
+      >Day</button>
+      <button
+        onClick={() => setView('week')}
+        className={`view-tab${view === 'week' ? ' active' : ''}`}
+      >Week</button>
     </div>
   );
 }
