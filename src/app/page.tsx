@@ -1,14 +1,20 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { format } from 'date-fns';
-import { RefreshCw, Radio } from 'lucide-react';
+import { format, addDays, addWeeks, startOfWeek, isSameMonth } from 'date-fns';
+import { RefreshCw, Radio, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
 import { Game } from '@/types';
+import { isTbd } from '@/lib/game-filters';
 import DayPicker from '@/components/DayPicker';
 import GameCard from '@/components/GameCard';
+import WeekView from '@/components/WeekView';
+
+type View = 'day' | 'week';
+type WeekSport = 'all' | 'football' | 'tennis';
+const mondayOf = (d: Date) => startOfWeek(d, { weekStartsOn: 1 });
 
 // EPL + WSL are pinned tabs — always shown in the football filter
 const PINNED_FOOTBALL_IDS = new Set([39, 754]);
@@ -25,6 +31,14 @@ export default function Home() {
   const [mobileSport, setMobileSport] = useState<'football' | 'tennis'>('tennis');
   const [tzAbbr, setTzAbbr] = useState('');
   const [currentTime, setCurrentTime] = useState('');
+
+  // Week view
+  const [view, setView] = useState<View>('day');
+  const [weekStart, setWeekStart] = useState<Date>(() => mondayOf(new Date()));
+  const [weekSport, setWeekSport] = useState<WeekSport>('all');
+  const [weekData, setWeekData] = useState<Record<string, Game[]>>({});
+  const [weekLoading, setWeekLoading] = useState(false);
+  const [weekError, setWeekError] = useState<string | null>(null);
 
   const fetchSchedule = useCallback(async (date: Date, force = false) => {
     setIsLoading(true);
@@ -43,14 +57,35 @@ export default function Home() {
     }
   }, []);
 
+  const fetchWeek = useCallback(async (start: Date, force = false) => {
+    setWeekLoading(true);
+    setWeekError(null);
+    try {
+      const days = Array.from({ length: 7 }, (_, i) => addDays(start, i));
+      const entries = await Promise.all(days.map(async d => {
+        const ds = format(d, 'yyyy-MM-dd');
+        const res = await fetch(`/api/schedule?date=${ds}&sport=all${force ? '&force=1' : ''}`);
+        const data = res.ok ? await res.json() : { games: [] };
+        return [ds, (data.games ?? []) as Game[]] as const;
+      }));
+      setWeekData(Object.fromEntries(entries));
+      setLastFetched(new Date());
+    } catch {
+      setWeekError('Could not load this week.');
+    } finally {
+      setWeekLoading(false);
+    }
+  }, []);
+
   useEffect(() => { if (!selectedDate) setSelectedDate(new Date()); }, [selectedDate]);
+  useEffect(() => { if (view === 'week') fetchWeek(weekStart); }, [view, weekStart, fetchWeek]);
   useEffect(() => {
     setTzAbbr(new Date().toLocaleTimeString('en', { timeZoneName: 'short' }).split(' ').pop() ?? '');
   }, []);
   useEffect(() => { if (selectedDate) fetchSchedule(selectedDate); }, [selectedDate, fetchSchedule]);
 
-  const soccerGames = useMemo(() => games.filter(g => g.sport === 'soccer'), [games]);
-  const tennisGames = useMemo(() => games.filter(g => g.sport === 'tennis'), [games]);
+  const soccerGames = useMemo(() => games.filter(g => g.sport === 'soccer' && !isTbd(g)), [games]);
+  const tennisGames = useMemo(() => games.filter(g => g.sport === 'tennis' && !isTbd(g)), [games]);
 
   const availableLeagues = useMemo(() => {
     const seen = new Map<number, { id: number; name: string; logo: string }>();
@@ -75,6 +110,11 @@ export default function Home() {
 
   const handleDateChange = useCallback((date: Date) => setSelectedDate(date), []);
 
+  const weekEnd = addDays(weekStart, 6);
+  const weekLabel = isSameMonth(weekStart, weekEnd)
+    ? `${format(weekStart, 'MMM d')} – ${format(weekEnd, 'd')}`
+    : `${format(weekStart, 'MMM d')} – ${format(weekEnd, 'MMM d')}`;
+
   const today = new Date();
   const isToday = selectedDate
     ? format(selectedDate, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd')
@@ -98,8 +138,18 @@ export default function Home() {
 
           <div className="header-right">
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div className="view-switcher">
+                <button
+                  onClick={() => setView('day')}
+                  className={`view-tab${view === 'day' ? ' active' : ''}`}
+                >Day</button>
+                <button
+                  onClick={() => setView('week')}
+                  className={`view-tab${view === 'week' ? ' active' : ''}`}
+                >Week</button>
+              </div>
               <Link href="/about" className="about-link about-link-desktop" style={{ marginRight: 6 }}>About</Link>
-              {isToday && (
+              {view === 'day' && isToday && (
                 <button
                   onClick={() => setLiveOnly(v => !v)}
                   className={`live-filter-pill${liveOnly ? ' active' : ''}`}
@@ -112,25 +162,47 @@ export default function Home() {
                 style={{
                   fontFamily: 'var(--font-fira), monospace',
                   fontSize: 11,
-                  color: isLoading ? 'var(--text3)' : 'var(--text)',
+                  color: (view === 'day' ? isLoading : weekLoading) ? 'var(--text3)' : 'var(--text)',
                   visibility: lastFetched ? 'visible' : 'hidden',
                 }}
               >
                 {lastFetched ? format(lastFetched, 'HH:mm') : '00:00'}
               </span>
               <button
-                onClick={() => selectedDate && fetchSchedule(selectedDate, true)}
-                disabled={isLoading || !selectedDate}
+                onClick={() => view === 'day'
+                  ? selectedDate && fetchSchedule(selectedDate, true)
+                  : fetchWeek(weekStart, true)}
+                disabled={view === 'day' ? (isLoading || !selectedDate) : weekLoading}
                 className="refresh-btn"
               >
-                <RefreshCw size={12} className={isLoading ? 'animate-spin' : ''} />
+                <RefreshCw size={12} className={(view === 'day' ? isLoading : weekLoading) ? 'animate-spin' : ''} />
               </button>
             </div>
           </div>
         </div>
 
         <div className="calendar-row">
-          {selectedDate && <DayPicker date={selectedDate} onChange={handleDateChange} />}
+          {view === 'day' ? (
+            selectedDate && <DayPicker date={selectedDate} onChange={handleDateChange} />
+          ) : (
+            <div className="week-nav">
+              <button
+                className="day-nav-btn"
+                onClick={() => setWeekStart(w => addWeeks(w, -1))}
+                aria-label="Previous week"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <span className="week-nav-label">{weekLabel}</span>
+              <button
+                className="day-nav-btn"
+                onClick={() => setWeekStart(w => addWeeks(w, 1))}
+                aria-label="Next week"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          )}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             {currentTime && (
               <span className="date-badge">{currentTime}</span>
@@ -141,26 +213,68 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="sport-switcher">
-          <button
-            onClick={() => setMobileSport('football')}
-            className={`sport-switch-btn f-tab${mobileSport === 'football' ? ' active' : ''}`}
-          >
-            <span className="sport-dot green" />
-            Football
-          </button>
-          <button
-            onClick={() => setMobileSport('tennis')}
-            className={`sport-switch-btn t-tab${mobileSport === 'tennis' ? ' active' : ''}`}
-          >
-            <span className="sport-dot blue" />
-            Tennis
-          </button>
-        </div>
+        {view === 'day' ? (
+          <div className="sport-switcher">
+            <button
+              onClick={() => setMobileSport('football')}
+              className={`sport-switch-btn f-tab${mobileSport === 'football' ? ' active' : ''}`}
+            >
+              <span className="sport-dot green" />
+              Football
+            </button>
+            <button
+              onClick={() => setMobileSport('tennis')}
+              className={`sport-switch-btn t-tab${mobileSport === 'tennis' ? ' active' : ''}`}
+            >
+              <span className="sport-dot blue" />
+              Tennis
+            </button>
+          </div>
+        ) : (
+          <div className="week-filter">
+            <button
+              onClick={() => setWeekSport('all')}
+              className={`league-tab${weekSport === 'all' ? ' active-neutral' : ''}`}
+            >All</button>
+            <button
+              onClick={() => setWeekSport('football')}
+              className={`league-tab f-tab${weekSport === 'football' ? ' active' : ''}`}
+            >
+              <span className="sport-dot green" />
+              Football
+            </button>
+            <button
+              onClick={() => setWeekSport('tennis')}
+              className={`league-tab t-tab${weekSport === 'tennis' ? ' active' : ''}`}
+            >
+              <span className="sport-dot blue" />
+              Tennis
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ── Main content ── */}
-      {isLoading ? (
+      {view === 'week' ? (
+        weekLoading ? (
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 10 }}>
+            <div className="animate-spin" style={{ width: 18, height: 18, borderRadius: '50%', border: '1.5px solid var(--border2)', borderTopColor: 'var(--text2)' }} />
+            <span style={{ fontSize: 13, color: 'var(--text2)' }}>Loading week…</span>
+          </div>
+        ) : weekError ? (
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 6 }}>
+            <p style={{ fontSize: 13, color: 'var(--text2)' }}>{weekError}</p>
+            <button
+              onClick={() => fetchWeek(weekStart, true)}
+              style={{ fontSize: 11, color: 'var(--text3)', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
+            >
+              Try again
+            </button>
+          </div>
+        ) : (
+          <WeekView weekStart={weekStart} data={weekData} sport={weekSport} />
+        )
+      ) : isLoading ? (
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 10 }}>
           <div className="animate-spin" style={{ width: 18, height: 18, borderRadius: '50%', border: '1.5px solid var(--border2)', borderTopColor: 'var(--text2)' }} />
           <span style={{ fontSize: 13, color: 'var(--text2)' }}>Loading schedule…</span>

@@ -532,6 +532,187 @@ html, body {
 }
 
 /* ────────────────────────────────────────
+   VIEW SWITCHER (Day / Week)
+──────────────────────────────────────── */
+.view-switcher {
+  display: inline-flex;
+  align-items: center;
+  background: #f5f5f4;
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 2px;
+}
+
+.view-tab {
+  font-family: var(--font-fira), monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  padding: 4px 13px;
+  border-radius: 18px;
+  border: none;
+  background: transparent;
+  color: var(--text2);
+  cursor: pointer;
+  transition: color 0.12s, background 0.12s;
+}
+.view-tab:hover { color: var(--text); }
+.view-tab.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+/* ────────────────────────────────────────
+   WEEK NAV + FILTER
+──────────────────────────────────────── */
+.week-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+.week-nav-label {
+  font-family: var(--font-fira), monospace;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: 0.01em;
+  min-width: 132px;
+  text-align: center;
+}
+
+.week-filter {
+  display: flex;
+  gap: 4px;
+  padding: 10px 0 0;
+}
+.league-tab.active-neutral {
+  color: var(--text);
+  border-color: var(--border2);
+  background: #f0f0ef;
+}
+
+/* ────────────────────────────────────────
+   WEEK VIEW (7-column grid)
+──────────────────────────────────────── */
+.week-view {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  background: var(--panel-bg);
+  scrollbar-width: none;
+}
+.week-view::-webkit-scrollbar { display: none; }
+
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  min-height: 100%;
+}
+
+.week-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-right: 1px solid var(--border);
+}
+.week-col:last-child { border-right: none; }
+
+.week-col-head {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 4px 8px;
+  background: var(--panel-bg);
+  border-bottom: 1px solid var(--border);
+}
+.week-dow {
+  font-family: var(--font-fira), monospace;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text2);
+}
+.week-dom {
+  font-size: 16px;
+  color: var(--text2);
+  line-height: 1;
+}
+.week-col.is-today .week-dow { color: var(--today); }
+.week-col.is-today .week-dom { color: var(--text); font-weight: 600; }
+
+.week-col-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 6px 40px;
+  min-height: 0;
+}
+
+.week-none {
+  text-align: center;
+  color: var(--text3);
+  font-size: 14px;
+  padding-top: 6px;
+}
+
+.week-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left-width: 2px;
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+.week-chip.football { border-left-color: var(--green); }
+.week-chip.tennis   { border-left-color: var(--blue); }
+
+.week-chip-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  margin-bottom: 1px;
+}
+.week-chip-time {
+  font-family: var(--font-fira), monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text2);
+}
+.week-live-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #dc2626;
+  flex-shrink: 0;
+  animation: fadepulse 2s ease-in-out infinite;
+}
+.week-chip-names {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.week-chip-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ────────────────────────────────────────
    SPORT SWITCHER (mobile only)
 ──────────────────────────────────────── */
 .sport-switcher {
@@ -599,6 +780,50 @@ html, body {
   .match-list {
     padding: 2px 14px 24px;
   }
+
+  /* Week view collapses to a day-grouped agenda list */
+  .week-nav { flex: 1; }
+  .week-nav-label { min-width: 0; flex: 1; }
+  .week-filter { padding-top: 8px; }
+
+  .week-grid {
+    grid-template-columns: 1fr;
+  }
+  .week-col {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .week-col:last-child { border-bottom: none; }
+  .week-col.is-empty { display: none; }
+
+  .week-col-head {
+    position: static;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: flex-start;
+    gap: 8px;
+    padding: 14px 16px 6px;
+    background: transparent;
+    border-bottom: none;
+  }
+  .week-dom { font-size: 15px; }
+
+  .week-col-body {
+    padding: 4px 16px 14px;
+  }
+  .week-chip {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+  .week-chip-top {
+    margin-bottom: 0;
+    min-width: 42px;
+    justify-content: flex-start;
+    gap: 5px;
+  }
+  .week-chip-names { flex: 1; }
+  .week-chip-name { font-size: 13px; }
 }
 
 /* ────────────────────────────────────────
