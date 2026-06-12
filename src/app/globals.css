@@ -599,7 +599,7 @@ html, body {
 .week-filter {
   display: flex;
   gap: 4px;
-  padding: 10px 0 14px;
+  padding: 12px 0 22px;
 }
 .league-tab.active-neutral {
   color: var(--text);
@@ -803,7 +803,7 @@ html, body {
   /* Week view collapses to a day-grouped agenda list */
   .week-nav { flex: 1; }
   .week-nav-label { min-width: 0; flex: 1; }
-  .week-filter { padding-top: 8px; }
+  .week-filter { padding: 8px 0 14px; }
 
   .week-grid {
     grid-template-columns: 1fr;
