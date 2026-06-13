@@ -110,6 +110,19 @@ export default function Home() {
 
   const handleDateChange = useCallback((date: Date) => setSelectedDate(date), []);
 
+  // Mobile sport default is sticky — remember the last sport viewed (seasonal).
+  // Hydrated in an effect (not the useState initializer) to avoid an SSR mismatch.
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('whatson:mobileSport');
+      if (saved === 'football' || saved === 'tennis') setMobileSport(saved);
+    } catch { /* localStorage unavailable */ }
+  }, []);
+  const selectMobileSport = useCallback((sport: 'football' | 'tennis') => {
+    setMobileSport(sport);
+    try { localStorage.setItem('whatson:mobileSport', sport); } catch { /* ignore */ }
+  }, []);
+
   const weekEnd = addDays(weekStart, 6);
   const weekLabel = isSameMonth(weekStart, weekEnd)
     ? `${format(weekStart, 'MMM d')} – ${format(weekEnd, 'd')}`
@@ -210,14 +223,14 @@ export default function Home() {
         {view === 'day' ? (
           <div className="sport-switcher">
             <button
-              onClick={() => setMobileSport('football')}
+              onClick={() => selectMobileSport('football')}
               className={`sport-switch-btn f-tab${mobileSport === 'football' ? ' active' : ''}`}
             >
               <span className="sport-dot green" />
               Football
             </button>
             <button
-              onClick={() => setMobileSport('tennis')}
+              onClick={() => selectMobileSport('tennis')}
               className={`sport-switch-btn t-tab${mobileSport === 'tennis' ? ' active' : ''}`}
             >
               <span className="sport-dot blue" />
